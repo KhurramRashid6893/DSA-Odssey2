@@ -14,18 +14,17 @@ const statsPanel = document.getElementById('stats-panel');
 const searchBox = document.getElementById('search-box');
 const topicFilter = document.getElementById('topic-filter');
 const togglePathBtn = document.getElementById('toggle-path-btn');
+const mainContent = document.getElementById('main-content');
 
-// --- New elements for AI feature ---
+// --- AI feature elements ---
 const languageInput = document.getElementById('language-input');
 const getCodeBtn = document.getElementById('get-code-btn');
-const codeDisplayContainer = document.getElementById('code-display-container');
-const codeOutput = document.getElementById('code-output');
 const aiLoading = document.getElementById('ai-loading');
 
-// Modal elements
+// --- Modal elements ---
 const codeModal = document.getElementById('code-modal');
 const modalCodeOutput = document.getElementById('modal-code-output');
-const closeBtn = document.querySelector('.close-btn');
+const closeModalBtn = document.getElementById('close-modal-btn');
 
 let currentProblemName = null; // Variable to store the current problem name
 
@@ -59,8 +58,8 @@ function addSun() {
     sunLight.position.set(0, 0, 0);
     scene.add(sunLight);
     const textureLoader = new THREE.TextureLoader();
-    const textureFlare0 = textureLoader.load("https://unpkg.com/three@0.157.0/examples/textures/lensflare/lensflare0.png");
-    const textureFlare3 = textureLoader.load("https://unpkg.com/three@0.157.0/examples/textures/lensflare/lensflare3.png");
+    const textureFlare0 = textureLoader.load("https://cdn.jsdelivr.net/npm/three@0.157.0/examples/textures/lensflare/lensflare0.png");
+    const textureFlare3 = textureLoader.load("https://cdn.jsdelivr.net/npm/three@0.157.0/examples/textures/lensflare/lensflare3.png");
     const lensflare = new Lensflare();
     lensflare.addElement(new LensflareElement(textureFlare0, 700, 0, sunLight.color));
     sunLight.add(lensflare);
@@ -97,6 +96,11 @@ const raycaster = new THREE.Raycaster(), pointer = new THREE.Vector2();
 
 function onPointerClick(event) {
     if (isAnimatingCamera) return;
+
+    // Don't trigger star clicks if the click is on the sidebar
+    if (sidebar.contains(event.target)) return;
+
+
     pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
     pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
     raycaster.setFromCamera(pointer, camera);
@@ -106,18 +110,18 @@ function onPointerClick(event) {
         const dayData = clickedStar.userData;
 
         // --- Updated InfoBox and AI logic ---
-        // Store the problem name
         currentProblemName = dayData.problems[0].name;
-
-        // Reset AI section
-        codeDisplayContainer.style.display = 'none';
-        codeOutput.textContent = '';
         languageInput.value = '';
 
         infoBox.innerHTML = `<h3>Day ${dayData.day}</h3><ul>${dayData.problems.map(p => `<li><div class="problem-details"><div class="planet-title">Planet Name:</div><a href="${p.link}" class="gfg-link" target="_blank">${p.name} ${p.emojis.join(' ')}</a><a href="${p.twitterPostLink}" class="twitter-link" target="_blank">View Post on 𝕏</a></div><span class="difficulty ${p.difficulty.toLowerCase()}">${p.difficulty}</span></li>`).join('')}</ul> <p class="notes">${dayData.problems[0].notes || ''}</p>`;
 
         sidebarMainContent.style.display = 'none';
         sidebarDetailsView.style.display = 'block';
+
+        // Open sidebar on mobile when a star is clicked
+        if (window.innerWidth <= 768) {
+            sidebar.classList.remove('collapsed');
+        }
     }
 }
 window.addEventListener('click', onPointerClick);
@@ -138,8 +142,7 @@ async function init() {
         const branchAngle = (branchIndex / numBranches) * Math.PI * 2;
         const distanceFromCenter = 20 + Math.random() * 100;
 
-        // ## THIS LINE IS NOW FIXED ##
-        const spinAngle = distanceFromCenter * 0.5;
+        const spinAngle = distanceFromCenter * 0.05;
 
         const x = Math.cos(branchAngle + spinAngle) * distanceFromCenter;
         const y = (Math.random() - 0.5) * 5;
@@ -190,6 +193,11 @@ async function init() {
     loadingScreen.addEventListener('transitionend', () => loadingScreen.remove());
     addSun();
     addGalaxy();
+
+    // Set initial sidebar state for mobile
+    if (window.innerWidth <= 768) {
+        sidebar.classList.add('collapsed');
+    }
 }
 
 function panCameraTo(targetObject) {
@@ -230,7 +238,7 @@ function animate() {
             isAnimatingCamera = false;
             cameraTarget = null;
         }
-    } else {
+    } else if (controls.enabled) {
         const time = Date.now() * 0.0005;
         camera.position.x = Math.sin(time * 0.1) * 100;
         camera.position.z = Math.cos(time * 0.1) * 100;
@@ -255,7 +263,7 @@ function animate() {
 }
 
 
-// --- New function to fetch code from backend ---
+// --- Function to fetch code from backend ---
 async function fetchCodeSolution() {
     const language = languageInput.value;
     if (!language || !currentProblemName) {
@@ -263,10 +271,7 @@ async function fetchCodeSolution() {
         return;
     }
 
-    // Show loading indicator
     aiLoading.style.display = 'block';
-    codeDisplayContainer.style.display = 'none';
-
 
     try {
         const response = await fetch('/api/get-code', {
@@ -287,16 +292,14 @@ async function fetchCodeSolution() {
         const data = await response.json();
         if (data.code_solution) {
             modalCodeOutput.textContent = data.code_solution;
-            codeModal.style.display = 'block';
         } else if (data.error) {
             modalCodeOutput.textContent = `Error: ${data.error}`;
-            codeModal.style.display = 'block';
         }
+        codeModal.style.display = 'block'; // Show modal with content
     } catch (error) {
         modalCodeOutput.textContent = `An error occurred: ${error.message}`;
-        codeModal.style.display = 'block';
+        codeModal.style.display = 'block'; // Show modal with error
     } finally {
-        // Hide loading indicator
         aiLoading.style.display = 'none';
     }
 }
@@ -315,15 +318,20 @@ togglePathBtn.addEventListener('click', () => {
     journeyPath.visible = !journeyPath.visible;
     togglePathBtn.innerText = journeyPath.visible ? 'Hide Journey Path' : 'Show Journey Path';
 });
-sidebarToggleBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
+sidebarToggleBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+    if (window.innerWidth > 768) {
+        mainContent.classList.toggle('sidebar-collapsed');
+    }
+});
 backToMainBtn.addEventListener('click', () => {
     sidebarDetailsView.style.display = 'none';
     sidebarMainContent.style.display = 'block';
 });
 getCodeBtn.addEventListener('click', fetchCodeSolution);
 
-// Modal event listeners
-closeBtn.addEventListener('click', () => {
+// --- Modal event listeners ---
+closeModalBtn.addEventListener('click', () => {
     codeModal.style.display = 'none';
 });
 

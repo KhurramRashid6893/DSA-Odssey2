@@ -23,9 +23,23 @@ body {
     position: fixed;
     top: 0;
     left: 0;
+    width: 100%;
+    height: 100%;
     outline: none;
     z-index: -1;
 }
+
+/* --- Main Content Layout --- */
+.main-content {
+    margin-left: 380px; /* Default margin for desktop */
+    transition: margin-left 0.3s ease-in-out;
+    height: 100vh;
+}
+
+.main-content.sidebar-collapsed {
+    margin-left: 0;
+}
+
 
 /* --- Sidebar Layout --- */
 .sidebar {
@@ -38,13 +52,13 @@ body {
     backdrop-filter: blur(10px);
     border-right: 1px solid var(--border-color);
     display: flex;
-    flex-direction: column; /* Changed to column for mobile */
+    flex-direction: column;
     transition: transform 0.3s ease-in-out;
     z-index: 100;
 }
 
 .sidebar.collapsed {
-    transform: translateX(-380px);
+    transform: translateX(-100%);
 }
 
 .sidebar-content {
@@ -72,7 +86,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
 }
 
 .sidebar.collapsed .sidebar-toggle-btn {
@@ -194,36 +208,7 @@ body {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* --- Mobile Responsiveness --- */
-@media (max-width: 768px) {
-    .sidebar {
-        width: 100%;
-        height: auto;
-        max-height: 100vh;
-        border-right: none;
-        border-bottom: 1px solid var(--border-color);
-        flex-direction: column;
-    }
-
-    .sidebar.collapsed {
-        transform: translateY(-100%);
-    }
-
-    .sidebar-toggle-btn {
-        top: auto;
-        bottom: -25px;
-        right: 50%;
-        transform: translateX(50%);
-        border-radius: 0 0 8px 8px;
-        border-top: none;
-    }
-
-    .sidebar.collapsed .sidebar-toggle-btn {
-        transform: translateX(50%) rotate(180deg);
-    }
-}
-
-/* ## NEW ##: Styles for the Details View and Back Button */
+/* --- Details View --- */
 .details-view {
     display: none; /* Hidden by default */
 }
@@ -245,21 +230,13 @@ body {
     background-color: var(--border-color);
 }
 
-/* Make the info-box borderless when it's in the details view */
 .details-view .info-box {
     border: none;
     padding: 0;
     margin: 0;
 }
 
-/* Mobile adjustments */
-@media (max-width: 768px) {
-    .back-button {
-        margin-bottom: 1rem;
-    }
-}
-
-/* ## NEW ##: Styles for the AI Section */
+/* --- AI Section --- */
 .ai-section {
     margin-top: 1.5rem;
     padding-top: 1.5rem;
@@ -279,7 +256,7 @@ body {
 }
 
 #language-input {
-    flex-grow: 1; /* Allow input to take available space */
+    flex-grow: 1;
     background: rgba(3, 6, 19, 0.5);
     border: 1px solid var(--border-color);
     color: var(--light-slate);
@@ -305,28 +282,13 @@ body {
     color: var(--space-black);
 }
 
-#code-display-container pre {
-    background-color: #010409; /* A very dark, code-editor-like background */
-    border-radius: 8px;
-    padding: 1rem;
-    overflow-x: auto;
-    white-space: pre-wrap; /* Wrap long lines */
-    word-wrap: break-word;
-}
-
-#code-display-container code {
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 0.85rem;
-    color: #c9d1d9; /* Light color for code */
-}
-
 #ai-loading p {
     text-align: center;
     opacity: 0.8;
     font-style: italic;
 }
 
-/* Modal styles */
+/* --- Modal Styles (Light Mode) --- */
 .modal {
     display: none;
     position: fixed;
@@ -336,22 +298,45 @@ body {
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0,0,0,0.7);
+    background-color: rgba(0,0,0,0.6);
 }
 
 .modal-content {
-    background-color: var(--sidebar-bg);
+    background-color: #f8f9fa;
+    color: #212529;
     margin: 10% auto;
-    padding: 20px;
-    border: 1px solid var(--border-color);
-    width: 80%;
-    max-width: 600px;
+    padding: 25px;
+    border: 1px solid #dee2e6;
+    width: 90%;
+    max-width: 700px;
     border-radius: 12px;
     position: relative;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.modal-content h4 {
+    color: #212529;
+    margin-bottom: 1rem;
+}
+
+.modal-content pre {
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.modal-content code {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    color: #343a40;
 }
 
 .close-btn {
-    color: #aaa;
+    color: #6c757d;
     position: absolute;
     top: 10px;
     right: 20px;
@@ -362,6 +347,42 @@ body {
 
 .close-btn:hover,
 .close-btn:focus {
-    color: white;
+    color: #000;
     text-decoration: none;
+}
+
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0; /* Full width by default */
+    }
+
+    /* We don't need a collapsed class for main-content on mobile as sidebar overlaps */
+
+    .sidebar {
+        width: 280px;
+        transform: translateX(-100%); /* Start collapsed on mobile */
+    }
+
+    .sidebar.collapsed {
+        transform: translateX(-100%);
+    }
+
+    /* Un-collapse the sidebar */
+    .sidebar:not(.collapsed) {
+        transform: translateX(0);
+    }
+    
+    .sidebar-toggle-btn {
+        transform: translateY(-50%) rotate(180deg);
+    }
+    
+    .sidebar:not(.collapsed) .sidebar-toggle-btn {
+        transform: translateY(-50%) rotate(0deg);
+    }
+
+    .back-button {
+        margin-bottom: 1rem;
+    }
 }
