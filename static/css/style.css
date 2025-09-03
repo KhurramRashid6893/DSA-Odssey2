@@ -17,6 +17,7 @@ body {
     background-color: var(--space-black);
     color: var(--light-slate);
     overflow: hidden;
+    position: relative;
 }
 
 #bg-canvas {
@@ -29,15 +30,44 @@ body {
     z-index: -1;
 }
 
-/* --- Main Content Layout --- */
-.main-content {
-    margin-left: 380px; /* Default margin for desktop */
-    transition: margin-left 0.3s ease-in-out;
-    height: 100vh;
+/* --- Hamburger Button --- */
+.sidebar-toggle-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 40px;
+    height: 40px;
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    z-index: 110;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    padding: 8px;
+    transition: all 0.3s ease;
 }
 
-.main-content.sidebar-collapsed {
-    margin-left: 0;
+.sidebar-toggle-btn span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background-color: var(--glow-cyan);
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.sidebar-toggle-btn.active span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+.sidebar-toggle-btn.active span:nth-child(2) {
+    opacity: 0;
+}
+.sidebar-toggle-btn.active span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
 }
 
 
@@ -48,6 +78,7 @@ body {
     left: 0;
     height: 100%;
     width: 380px;
+    max-width: 90%;
     background: var(--sidebar-bg);
     backdrop-filter: blur(10px);
     border-right: 1px solid var(--border-color);
@@ -61,36 +92,27 @@ body {
     transform: translateX(-100%);
 }
 
+.sidebar-content-wrapper {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
 .sidebar-content {
     padding: 2rem;
-    overflow-y: auto;
-    width: 100%;
-    flex-grow: 1;
+    padding-top: 80px; /* Space for the fixed hamburger button */
 }
 
-.sidebar-toggle-btn {
-    position: absolute;
-    top: 50%;
-    right: -25px;
-    transform: translateY(-50%);
-    width: 25px;
-    height: 50px;
-    background: var(--sidebar-bg);
-    border: 1px solid var(--border-color);
-    border-left: none;
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
-    color: var(--glow-cyan);
-    cursor: pointer;
-    font-size: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease-in-out;
+.sidebar-footer {
+    padding: 1rem 2rem;
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+    font-size: 0.9rem;
+    opacity: 0.8;
 }
 
-.sidebar.collapsed .sidebar-toggle-btn {
-    transform: translateY(-50%) rotate(180deg);
+/* --- Main Content Layout --- */
+#main-content {
+    height: 100vh;
 }
 
 
@@ -251,12 +273,12 @@ body {
 
 .ai-controls {
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
+    flex-direction: column;
+    gap: 0.75rem;
 }
 
 #language-input {
-    flex-grow: 1;
+    width: 100%;
     background: rgba(3, 6, 19, 0.5);
     border: 1px solid var(--border-color);
     color: var(--light-slate);
@@ -286,6 +308,7 @@ body {
     text-align: center;
     opacity: 0.8;
     font-style: italic;
+    margin-top: 0.5rem;
 }
 
 /* --- Modal Styles (Light Mode) --- */
@@ -349,40 +372,4 @@ body {
 .close-btn:focus {
     color: #000;
     text-decoration: none;
-}
-
-
-/* --- Mobile Responsiveness --- */
-@media (max-width: 768px) {
-    .main-content {
-        margin-left: 0; /* Full width by default */
-    }
-
-    /* We don't need a collapsed class for main-content on mobile as sidebar overlaps */
-
-    .sidebar {
-        width: 280px;
-        transform: translateX(-100%); /* Start collapsed on mobile */
-    }
-
-    .sidebar.collapsed {
-        transform: translateX(-100%);
-    }
-
-    /* Un-collapse the sidebar */
-    .sidebar:not(.collapsed) {
-        transform: translateX(0);
-    }
-    
-    .sidebar-toggle-btn {
-        transform: translateY(-50%) rotate(180deg);
-    }
-    
-    .sidebar:not(.collapsed) .sidebar-toggle-btn {
-        transform: translateY(-50%) rotate(0deg);
-    }
-
-    .back-button {
-        margin-bottom: 1rem;
-    }
 }

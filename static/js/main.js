@@ -58,8 +58,8 @@ function addSun() {
     sunLight.position.set(0, 0, 0);
     scene.add(sunLight);
     const textureLoader = new THREE.TextureLoader();
-    const textureFlare0 = textureLoader.load("https://cdn.jsdelivr.net/npm/three@0.157.0/examples/textures/lensflare/lensflare0.png");
-    const textureFlare3 = textureLoader.load("https://cdn.jsdelivr.net/npm/three@0.157.0/examples/textures/lensflare/lensflare3.png");
+    const textureFlare0 = textureLoader.load("https://unpkg.com/three@0.157.0/examples/textures/lensflare/lensflare0.png");
+    const textureFlare3 = textureLoader.load("https://unpkg.com/three@0.157.0/examples/textures/lensflare/lensflare3.png");
     const lensflare = new Lensflare();
     lensflare.addElement(new LensflareElement(textureFlare0, 700, 0, sunLight.color));
     sunLight.add(lensflare);
@@ -97,8 +97,8 @@ const raycaster = new THREE.Raycaster(), pointer = new THREE.Vector2();
 function onPointerClick(event) {
     if (isAnimatingCamera) return;
 
-    // Don't trigger star clicks if the click is on the sidebar
-    if (sidebar.contains(event.target)) return;
+    // Don't trigger star clicks if the click is on the sidebar or toggle button
+    if (sidebar.contains(event.target) || sidebarToggleBtn.contains(event.target)) return;
 
 
     pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -109,7 +109,6 @@ function onPointerClick(event) {
         const clickedStar = intersects[0].object;
         const dayData = clickedStar.userData;
 
-        // --- Updated InfoBox and AI logic ---
         currentProblemName = dayData.problems[0].name;
         languageInput.value = '';
 
@@ -118,10 +117,9 @@ function onPointerClick(event) {
         sidebarMainContent.style.display = 'none';
         sidebarDetailsView.style.display = 'block';
 
-        // Open sidebar on mobile when a star is clicked
-        if (window.innerWidth <= 768) {
-            sidebar.classList.remove('collapsed');
-        }
+        sidebar.classList.remove('collapsed');
+        sidebarToggleBtn.classList.add('active');
+
     }
 }
 window.addEventListener('click', onPointerClick);
@@ -193,11 +191,6 @@ async function init() {
     loadingScreen.addEventListener('transitionend', () => loadingScreen.remove());
     addSun();
     addGalaxy();
-
-    // Set initial sidebar state for mobile
-    if (window.innerWidth <= 768) {
-        sidebar.classList.add('collapsed');
-    }
 }
 
 function panCameraTo(targetObject) {
@@ -320,9 +313,7 @@ togglePathBtn.addEventListener('click', () => {
 });
 sidebarToggleBtn.addEventListener('click', () => {
     sidebar.classList.toggle('collapsed');
-    if (window.innerWidth > 768) {
-        mainContent.classList.toggle('sidebar-collapsed');
-    }
+    sidebarToggleBtn.classList.toggle('active');
 });
 backToMainBtn.addEventListener('click', () => {
     sidebarDetailsView.style.display = 'none';
