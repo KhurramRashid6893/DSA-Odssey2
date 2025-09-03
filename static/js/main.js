@@ -22,6 +22,11 @@ const codeDisplayContainer = document.getElementById('code-display-container');
 const codeOutput = document.getElementById('code-output');
 const aiLoading = document.getElementById('ai-loading');
 
+// Modal elements
+const codeModal = document.getElementById('code-modal');
+const modalCodeOutput = document.getElementById('modal-code-output');
+const closeBtn = document.querySelector('.close-btn');
+
 let currentProblemName = null; // Variable to store the current problem name
 
 // 1. Scene, Camera, and Renderer Setup
@@ -281,15 +286,15 @@ async function fetchCodeSolution() {
 
         const data = await response.json();
         if (data.code_solution) {
-            codeOutput.textContent = data.code_solution;
-            codeDisplayContainer.style.display = 'block';
+            modalCodeOutput.textContent = data.code_solution;
+            codeModal.style.display = 'block';
         } else if (data.error) {
-            codeOutput.textContent = `Error: ${data.error}`;
-            codeDisplayContainer.style.display = 'block';
+            modalCodeOutput.textContent = `Error: ${data.error}`;
+            codeModal.style.display = 'block';
         }
     } catch (error) {
-        codeOutput.textContent = `An error occurred: ${error.message}`;
-        codeDisplayContainer.style.display = 'block';
+        modalCodeOutput.textContent = `An error occurred: ${error.message}`;
+        codeModal.style.display = 'block';
     } finally {
         // Hide loading indicator
         aiLoading.style.display = 'none';
@@ -315,7 +320,19 @@ backToMainBtn.addEventListener('click', () => {
     sidebarDetailsView.style.display = 'none';
     sidebarMainContent.style.display = 'block';
 });
-getCodeBtn.addEventListener('click', fetchCodeSolution); // Event listener for the new button
+getCodeBtn.addEventListener('click', fetchCodeSolution);
+
+// Modal event listeners
+closeBtn.addEventListener('click', () => {
+    codeModal.style.display = 'none';
+});
+
+window.addEventListener('click', (event) => {
+    if (event.target == codeModal) {
+        codeModal.style.display = 'none';
+    }
+});
+
 
 // Kick everything off!
 init();
